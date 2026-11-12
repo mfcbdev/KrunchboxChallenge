@@ -279,6 +279,7 @@ async function purchase(eventId) {
     qty.focus();
     return;
   }
+  buy.disabled = true; // a double-click must not buy twice
   buy.setAttribute("aria-busy", "true");
   msg.textContent = "Buying…";
   try {
@@ -294,11 +295,13 @@ async function purchase(eventId) {
     msg.textContent = err.message;
   } finally {
     buy.removeAttribute("aria-busy");
+    buy.disabled = false; // refresh() disables it again if the event is now sold out
     await refresh();
   }
 }
 
-async function refund(orderId) {
+async function refund(orderId, button) {
+  button.disabled = true; // the table re-renders after refresh()
   const msg = $("#orders-msg");
   msg.className = "msg";
   msg.textContent = "Refunding…";
@@ -328,7 +331,7 @@ async function loadOrders() {
     let action;
     if (!paid) action = null; // status column already says Refunded
     else if (ev && started(ev)) action = h("span", {}, "Event started");
-    else action = h("button", { class: "btn-refund", type: "button", onclick: () => refund(o.id), "aria-label": `Refund order ${o.id}` }, "Refund");
+    else action = h("button", { class: "btn-refund", type: "button", onclick: (e) => refund(o.id, e.currentTarget), "aria-label": `Refund order ${o.id}` }, "Refund");
     return h("tr", {},
       h("td", { class: "num" }, `#${o.id}`),
       h("td", {}, ev ? ev.name : `Event ${o.event_id}`),

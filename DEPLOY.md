@@ -41,7 +41,7 @@ Check it: `/health` returns `{"status":"ok"}`, `/` shows the UI, `/docs` shows t
 
 ## 4. Put the live URL in the README
 
-Add the URL as the first line of `README.md` (written in Phase 6) and push. Every push to `main` redeploys automatically.
+Replace the placeholder on the **Live** line at the top of `README.md` with your URL and push. Every push to `main` redeploys automatically.
 
 ## Good to know
 
