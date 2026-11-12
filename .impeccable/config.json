@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "app/static/index.html"
+        ],
+        "createdAt": "2026-11-12T04:41:13.664Z",
+        "reason": "Claude verified: section.band is a full-bleed background; its inner .wrap insets content 16px+ at every width (checked in 390px and 1440px renders)"
+      }
+    ]
+  }
+}

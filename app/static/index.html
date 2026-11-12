@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Venue Tickets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500&family=Figtree:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #04334D;
+    --text: #4B4F58;
+    --muted: #5F636B;
+    --blue: #0170B9;
+    --cyan: #00ADEE;
+    --cyan-hover: #1BBBF5;
+    --bg: #FFFFFF;
+    --surface: #F5F5F5;
+    --border: #E5E5E5;
+    --green: #2ABB7F;
+    --orange: #F8A03F;
+    --error: #B42318;
+    --head: "Figtree", system-ui, sans-serif;
+    --body: "DM Sans", system-ui, sans-serif;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 400 16px/1.55 var(--body);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: #BDEBFC; color: var(--navy); }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+  h1, h2, h3 { font-family: var(--head); font-weight: 700; color: var(--navy); margin: 0; text-wrap: balance; }
+  .num { font-variant-numeric: tabular-nums; }
+  .wrap { width: min(1080px, 100% - 32px); margin-inline: auto; }
+
+  /* Header */
+  header { padding: 40px 0 32px; }
+  header .wrap { display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: end; justify-content: space-between; }
+  h1 { font-size: 1.75rem; letter-spacing: -0.01em; line-height: 1.2; }
+  header p { margin: 6px 0 0; }
+  .buyer { display: grid; gap: 6px; font-size: 0.875rem; }
+  .buyer label { font-weight: 500; color: var(--navy); }
+
+  /* Controls */
+  select, input {
+    font: inherit;
+    color: var(--navy);
+    background: var(--bg);
+    border: 1px solid #C9CCD1;
+    border-radius: 7px;
+    padding: 8px 12px;
+    min-height: 40px;
+  }
+  select { min-width: 220px; padding-right: 36px; appearance: none;
+    background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%2304334D' stroke-width='1.6'%3E%3Cpath d='m1 1.5 5 5 5-5'/%3E%3C/svg%3E") no-repeat right 12px center; }
+  select:hover, input:hover { border-color: #A9ADB4; }
+  select:disabled, input:disabled { background-color: var(--surface); color: #8A8E95; border-color: var(--border); cursor: not-allowed; }
+  input[type=number] { width: 72px; text-align: center; }
+  button {
+    font: 700 0.9375rem/1 var(--head);
+    border: 0;
+    border-radius: 7px;
+    padding: 8px 12px;
+    min-height: 40px;
+    cursor: pointer;
+    transition: background-color 160ms var(--ease);
+  }
+  .btn-buy { background: var(--cyan); color: var(--navy); padding-inline: 18px; }
+  .btn-buy:hover { background: var(--cyan-hover); }
+  .btn-refund { background: transparent; color: var(--blue); border: 1px solid currentColor; min-height: 34px; padding: 6px 12px; }
+  .btn-refund:hover { background: #EAF4FB; }
+  button:disabled { background: var(--surface); color: #8A8E95; border-color: var(--border); cursor: not-allowed; }
+  button[aria-busy=true] { cursor: progress; opacity: 0.75; }
+
+  /* Events */
+  .band { background: var(--surface); padding: 40px 0 48px; border-block: 1px solid var(--border); }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+  h2 { font-size: 1.25rem; }
+  .events { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; list-style: none; margin: 0; padding: 0; }
+  .event {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 1px 2px rgba(4, 51, 77, 0.04);
+  }
+  .event h3 { font-size: 1.125rem; line-height: 1.3; }
+  .meta { margin: 4px 0 0; font-size: 0.9375rem; }
+  .price { margin: 0; color: var(--navy); font-weight: 500; }
+  .price span { color: var(--text); font-weight: 400; font-size: 0.875rem; }
+
+  .meter { display: grid; gap: 8px; }
+  .meter-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.875rem; }
+  .meter-count { color: var(--navy); font-weight: 500; }
+  .meter-state { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex: none; }
+  .meter-track { height: 6px; border-radius: 3px; background: #E9EAEC; overflow: hidden; }
+  .meter-fill { height: 100%; width: 0; background: var(--cyan); border-radius: inherit; transition: width 700ms var(--ease), background-color 300ms; }
+  .event[data-state=low] .meter-fill, .event[data-state=low] .dot { background: var(--orange); }
+  .event[data-state=closed] .dot, .event[data-state=soldout] .dot { background: #A9ADB4; }
+  .event[data-state=closed] .meter-fill { background: #C9CCD1; }
+
+  .buy { display: flex; align-items: end; gap: 10px; margin-top: auto; }
+  .buy label { display: grid; gap: 4px; font-size: 0.8125rem; font-weight: 500; color: var(--navy); }
+  .msg { margin: 0; min-height: 1.5em; font-size: 0.875rem; }
+  .msg.ok { color: #13693F; }
+  .msg.err { color: var(--error); }
+
+  /* Orders */
+  .orders { padding: 48px 0 72px; }
+  .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+  th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { font: 500 0.8125rem/1.3 var(--body); color: var(--navy); background: var(--surface); }
+  tr:last-child td { border-bottom: 0; }
+  td.right, th.right { text-align: right; }
+  td:first-child { color: var(--navy); }
+  .status { display: inline-flex; align-items: center; gap: 8px; }
+  .status.refunded .dot { background: #A9ADB4; }
+  .empty { margin: 0; padding: 32px 16px; text-align: center; }
+  .note { margin: 12px 0 0; font-size: 0.875rem; color: var(--muted); }
+
+  .loading { color: var(--muted); }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  @media (max-width: 560px) {
+    header { padding-top: 28px; }
+    select { width: 100%; }
+    .buyer { width: 100%; }
+    .event { padding: 20px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div>
+      <h1>Venue Tickets</h1>
+      <p>Sell seats and refund orders. Every sale is checked against what's left.</p>
+    </div>
+    <div class="buyer">
+      <label for="customer">Buying as</label>
+      <select id="customer" disabled><option>Loading…</option></select>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="band" aria-labelledby="events-title">
+    <div class="wrap">
+      <div class="section-head"><h2 id="events-title">Events</h2></div>
+      <p id="events-status" class="loading" role="status">Loading events…</p>
+      <ul class="events" id="events"></ul>
+    </div>
+  </section>
+
+  <section class="orders" aria-labelledby="orders-title">
+    <div class="wrap">
+      <div class="section-head"><h2 id="orders-title">Your orders</h2></div>
+      <p id="orders-msg" class="msg" role="status" tabindex="-1"></p>
+      <div class="table-scroll" id="orders"></div>
+      <p class="note">Refunds return the seats to the event. They close when the event starts.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = (sel) => document.querySelector(sel);
+const money = new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" });
+const when = new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+const MAX_PER_ORDER = 10;
+
+let events = new Map();
+let customerId = null;
+
+function h(tag, attrs = {}, ...children) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") el.className = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) el.setAttribute(k, v === true ? "" : v);
+  }
+  el.append(...children.flat().filter((c) => c != null));
+  return el;
+}
+
+async function api(path, options = {}) {
+  const res = await fetch(path, { headers: { "content-type": "application/json" }, ...options });
+  const body = await res.json().catch(() => null);
+  if (!res.ok) {
+    // 422 detail is a list of field errors; 404/409 detail is a sentence from the server.
+    const detail = Array.isArray(body?.detail) ? "Choose between 1 and 10 tickets." : body?.detail;
+    throw new Error(detail || `Something went wrong (${res.status}). Try again.`);
+  }
+  return body;
+}
+
+const started = (ev) => new Date(ev.starts_at) <= new Date();
+
+function stateOf(ev) {
+  if (started(ev)) return "closed";
+  if (ev.available === 0) return "soldout";
+  if (ev.available <= Math.max(5, ev.capacity * 0.1)) return "low";
+  return "open";
+}
+
+const STATE_LABEL = { open: "On sale", low: "Almost gone", soldout: "Sold out", closed: "Started, sales closed" };
+
+function eventCard(ev) {
+  const qty = h("input", { type: "number", id: `qty-${ev.id}`, min: 1, max: MAX_PER_ORDER, value: 1, inputmode: "numeric" });
+  const buy = h("button", { class: "btn-buy", type: "submit" }, "Buy");
+  const msg = h("p", { class: "msg", role: "status" });
+  // novalidate: our own inline message replaces the browser's tooltip, and over-buying reaches the server's 409.
+  const form = h("form", { class: "buy", novalidate: true, onsubmit: (e) => { e.preventDefault(); purchase(ev.id); } },
+    h("label", { for: qty.id }, "Tickets", qty), buy);
+  const card = h("li", { class: "event", id: `event-${ev.id}` },
+    h("div", {}, h("h3", {}, ev.name), h("p", { class: "meta" }, `${when.format(new Date(ev.starts_at))} · ${ev.venue}`)),
+    h("p", { class: "price num" }, money.format(ev.ticket_price), h("span", {}, " per ticket")),
+    h("div", { class: "meter" },
+      h("div", { class: "meter-top" },
+        h("span", { class: "meter-state" }, h("span", { class: "dot", "aria-hidden": "true" }), h("span", { class: "state-label" })),
+        h("span", { class: "meter-count num" })),
+      h("div", { class: "meter-track", role: "meter", "aria-valuemin": 0, "aria-valuemax": ev.capacity, "aria-label": `Seats left for ${ev.name}` },
+        h("div", { class: "meter-fill" }))),
+    form, msg);
+  card._els = { qty, buy, msg };
+  return card;
+}
+
+function updateCard(ev) {
+  const card = $(`#event-${ev.id}`);
+  const state = stateOf(ev);
+  card.dataset.state = state;
+  card.querySelector(".state-label").textContent = STATE_LABEL[state];
+  card.querySelector(".meter-count").textContent = `${ev.available} / ${ev.capacity} left`;
+  const track = card.querySelector(".meter-track");
+  track.setAttribute("aria-valuenow", ev.available);
+  track.setAttribute("aria-valuetext", `${ev.available} of ${ev.capacity} seats left`);
+  card.querySelector(".meter-fill").style.width = `${(ev.available / ev.capacity) * 100}%`;
+  const { qty, buy } = card._els;
+  const closed = state === "closed" || state === "soldout";
+  buy.disabled = qty.disabled = closed || customerId == null;
+}
+
+async function loadEvents() {
+  const list = await api("/events");
+  const ul = $("#events");
+  for (const ev of list) {
+    if (!events.has(ev.id)) ul.append(eventCard(ev));
+    events.set(ev.id, ev);
+  }
+  void ul.offsetWidth; // flush layout so new meters animate from 0 instead of appearing full
+  list.forEach(updateCard);
+  $("#events-status").hidden = true;
+  if (!list.length) { $("#events-status").hidden = false; $("#events-status").textContent = "No events yet."; }
+}
+
+async function purchase(eventId) {
+  const card = $(`#event-${eventId}`);
+  const { qty, buy, msg } = card._els;
+  const quantity = Number(qty.value);
+  msg.className = "msg";
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_PER_ORDER) {
+    msg.className = "msg err";
+    msg.textContent = `Choose between 1 and ${MAX_PER_ORDER} tickets.`;
+    qty.focus();
+    return;
+  }
+  buy.setAttribute("aria-busy", "true");
+  msg.textContent = "Buying…";
+  try {
+    const order = await api(`/events/${eventId}/purchase`, {
+      method: "POST",
+      body: JSON.stringify({ customer_id: customerId, quantity }),
+    });
+    msg.className = "msg ok";
+    msg.textContent = `Order #${order.id} confirmed: ${order.quantity} × ${money.format(order.unit_price)} = ${money.format(order.total)}.`;
+    qty.value = 1;
+  } catch (err) {
+    msg.className = "msg err";
+    msg.textContent = err.message;
+  } finally {
+    buy.removeAttribute("aria-busy");
+    await refresh();
+  }
+}
+
+async function refund(orderId) {
+  const msg = $("#orders-msg");
+  msg.className = "msg";
+  msg.textContent = "Refunding…";
+  try {
+    const order = await api(`/orders/${orderId}/refund`, { method: "POST" });
+    msg.className = "msg ok";
+    msg.textContent = `Order #${order.id} refunded: ${order.quantity} ${order.quantity === 1 ? "seat" : "seats"} back on sale, ${money.format(order.total)} returned.`;
+  } catch (err) {
+    msg.className = "msg err";
+    msg.textContent = err.message;
+  }
+  await refresh();
+  msg.focus(); // the clicked button is gone after a re-render; keep the keyboard user oriented
+}
+
+async function loadOrders() {
+  const box = $("#orders");
+  if (customerId == null) { box.replaceChildren(); return; }
+  const orders = await api(`/customers/${customerId}/orders`);
+  if (!orders.length) {
+    box.replaceChildren(h("p", { class: "empty" }, "No orders yet. Pick an event above and buy a ticket."));
+    return;
+  }
+  const rows = orders.map((o) => {
+    const ev = events.get(o.event_id);
+    const paid = o.status === "PAID";
+    let action;
+    if (!paid) action = null; // status column already says Refunded
+    else if (ev && started(ev)) action = h("span", {}, "Event started");
+    else action = h("button", { class: "btn-refund", type: "button", onclick: () => refund(o.id), "aria-label": `Refund order ${o.id}` }, "Refund");
+    return h("tr", {},
+      h("td", { class: "num" }, `#${o.id}`),
+      h("td", {}, ev ? ev.name : `Event ${o.event_id}`),
+      h("td", { class: "num right" }, String(o.quantity)),
+      h("td", { class: "num right" }, money.format(o.total)),
+      h("td", {}, h("span", { class: `status ${paid ? "paid" : "refunded"}` }, h("span", { class: "dot", "aria-hidden": "true" }), paid ? "Paid" : "Refunded")),
+      h("td", { class: "num" }, when.format(new Date(o.created_at))),
+      h("td", { class: "right" }, action));
+  });
+  box.replaceChildren(h("table", { "aria-labelledby": "orders-title" },
+    h("thead", {}, h("tr", {},
+      h("th", { scope: "col" }, "Order"), h("th", { scope: "col" }, "Event"),
+      h("th", { scope: "col", class: "right" }, "Tickets"), h("th", { scope: "col", class: "right" }, "Total"),
+      h("th", { scope: "col" }, "Status"), h("th", { scope: "col" }, "Bought"),
+      h("th", { scope: "col", class: "right" }, h("span", { class: "sr-only" }, "Action")))),
+    h("tbody", {}, rows)));
+}
+
+async function refresh() {
+  try {
+    await loadEvents();
+    await loadOrders();
+  } catch (err) {
+    $("#orders-msg").className = "msg err";
+    $("#orders-msg").textContent = `Couldn't refresh: ${err.message}`;
+  }
+}
+
+async function init() {
+  // Free hosting sleeps when idle; tell the visitor why the first load is slow.
+  const slow = setTimeout(() => {
+    $("#events-status").textContent = "Waking up the server. The first request can take up to a minute.";
+  }, 3000);
+  try {
+    const customers = await api("/customers");
+    const select = $("#customer");
+    select.replaceChildren(...customers.map((c) => h("option", { value: c.id }, `${c.name} (${c.email})`)));
+    let saved = null;
+    try { saved = localStorage.getItem("customerId"); } catch {}
+    if (saved && customers.some((c) => String(c.id) === saved)) select.value = saved;
+    customerId = customers.length ? Number(select.value) : null;
+    select.disabled = !customers.length;
+    select.addEventListener("change", () => {
+      customerId = Number(select.value);
+      try { localStorage.setItem("customerId", select.value); } catch {}
+      $("#orders-msg").textContent = "";
+      refresh();
+    });
+    await refresh();
+  } catch (err) {
+    $("#events-status").className = "msg err";
+    $("#events-status").textContent = `Couldn't load the page data: ${err.message}`;
+  } finally {
+    clearTimeout(slow);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

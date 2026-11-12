@@ -1,0 +1,12 @@
+# Render Blueprint: one Docker web service. Postgres lives on Neon, passed in as DATABASE_URL.
+services:
+  - type: web
+    name: venue-tickets
+    runtime: docker
+    plan: free
+    region: oregon # create the Neon project in AWS us-west-2 (Oregon) to keep DB latency low
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false # secret: Render asks for it when the Blueprint is created
