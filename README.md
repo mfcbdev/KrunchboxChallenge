@@ -38,8 +38,8 @@ uv run pytest
 
 Tests run against real Postgres, in a separate `tickets_test` database (override with `TEST_DATABASE_URL`). They never touch `DATABASE_URL`, so they can't wipe real data.
 
-- `test_purchase.py`: happy path, sold out (409), last seats, quantity validation (422), unknown event or customer (404), purchase after the event started (409).
-- `test_refund.py`: refund restores capacity, double refund is 409 and restores only once, unknown order (404), refund after the event started (409).
+- `test_purchase.py`: happy path, sold out (409), last seats, quantity validation (422), unknown event or customer (404), purchase after the event started (409), UI served at `/`.
+- `test_refund.py`: refund restores capacity, double refund is 409 and restores only once, unknown order (404), refund after the event started (409), a customer's order list shows both PAID and REFUNDED.
 - `test_concurrency.py`: 20 threads buy the last 5 seats at the same instant: exactly 5 succeed, 15 get 409, `available` ends at 0, 5 orders exist. 10 threads refund the same order at once: exactly 1 succeeds.
 
 ## API
