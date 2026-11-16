@@ -29,7 +29,7 @@ def seed() -> None:
                 Event(
                     name="Indie Showcase",
                     venue="Studio B",
-                    starts_at=now + timedelta(days=3),
+                    starts_at=now + timedelta(days=4),
                     capacity=50,
                     available=3,  # nearly sold out
                     ticket_price=Decimal("20.00"),

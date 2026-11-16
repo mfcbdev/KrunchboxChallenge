@@ -1,7 +1,5 @@
 # Venue Tickets
 
-**Live:** _https://YOUR-SERVICE.onrender.com_ (UI at `/`, API docs at `/docs`). Free hosting sleeps when idle, so the first request can take 30–60 s.
-
 A ticketing API for an event venue: **purchase** tickets (capacity goes down) and **refund** them (capacity comes back), without ever overselling, even when many requests hit the same event at once.
 
 Python · FastAPI · SQLAlchemy 2.0 · PostgreSQL (psycopg 3) · pytest · Docker
@@ -116,7 +114,3 @@ Postgres locks the row while it checks the condition, and a concurrent update re
 - **Idempotency keys** on purchase, so a retried request (network blip, double submit) can't create two orders.
 - **Per-ticket records with QR codes** for entry scanning, on top of the order.
 - **Pagination** on the list endpoints.
-
-## Deploy
-
-Render (app, from the `Dockerfile`) + Neon (Postgres). Step by step in [DEPLOY.md](DEPLOY.md).

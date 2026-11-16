@@ -361,10 +361,6 @@ async function refresh() {
 }
 
 async function init() {
-  // Free hosting sleeps when idle; tell the visitor why the first load is slow.
-  const slow = setTimeout(() => {
-    $("#events-status").textContent = "Waking up the server. The first request can take up to a minute.";
-  }, 3000);
   try {
     const customers = await api("/customers");
     const select = $("#customer");
@@ -384,8 +380,6 @@ async function init() {
   } catch (err) {
     $("#events-status").className = "msg err";
     $("#events-status").textContent = `Couldn't load the page data: ${err.message}`;
-  } finally {
-    clearTimeout(slow);
   }
 }
 

@@ -17,5 +17,5 @@ USER appuser
 ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8000
 
-# Seed is idempotent. PORT is set by hosts like Render; defaults to 8000 locally.
+# Seed is idempotent. The port can be overridden with the PORT env var; defaults to 8000.
 CMD ["sh", "-c", "python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
